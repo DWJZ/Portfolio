@@ -1,6 +1,6 @@
 # Portfolio
 
-A static portfolio site served via nginx in Docker with HTTPS.
+A React (Vite + TypeScript) portfolio site built and served via Docker with nginx and HTTPS.
 
 **Live:** [https://ec2-3-144-96-50.us-east-2.compute.amazonaws.com/](https://ec2-3-144-96-50.us-east-2.compute.amazonaws.com/)
 
