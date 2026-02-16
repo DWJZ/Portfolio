@@ -2,7 +2,7 @@
 
 services:
   portfolio:
-    image: ghcr.io/dwjz/portfolio:main
+    image: ghcr.io/dwjz/portfolio:latest
     ports:
       - "80:80"
       - "443:443"
