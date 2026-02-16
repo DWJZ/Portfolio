@@ -1,0 +1,58 @@
+# Deploys the Docker image to EC2 via SSH after a successful build
+#
+# Required secrets:
+#   SSH_PRIVATE_KEY  - Private key for SSH auth
+#   DEPLOY_HOST      - EC2 hostname or IP
+#   DEPLOY_USER      - SSH username (e.g. ubuntu)
+#   GHCR_TOKEN       - GitHub PAT with read:packages (for pulling from ghcr.io)
+#   DEPLOY_PATH      - Remote directory. Must contain certs/
+#
+#   Optional:
+#   SSH_PORT         - SSH port (default: 22)
+
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build and Publish Docker Image"]
+    types:
+      - completed
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Only run if the build workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy files to EC2
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          source: "docker-compose.deploy.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || 22 }}
+          envs: DEPLOY_PATH,DOCKER_IMAGE
+          script: |
+            set -e
+            cd $DEPLOY_PATH
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.deploy.yml pull
+            docker compose -f docker-compose.deploy.yml up -d

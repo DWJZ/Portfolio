@@ -1,0 +1,13 @@
+# Used for deployment - uses pre-built image from ghcr.io
+
+services:
+  portfolio:
+    image: ghcr.io/dwjz/portfolio:main
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs/selfsigned.crt:/etc/ssl/certs/selfsigned.crt:ro
+      - ./certs/selfsigned.key:/etc/ssl/private/selfsigned.key:ro
+    container_name: portfolio
+    restart: unless-stopped
