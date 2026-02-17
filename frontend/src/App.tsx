@@ -9,6 +9,7 @@ import { HomePage } from "./pages/HomePage";
 import { DemosPage } from "./pages/DemosPage";
 import { PlaygroundPage } from "./pages/PlaygroundPage";
 import { LabPage } from "./pages/LabPage";
+import { TftCalculatorPage } from "./pages/TftCalculatorPage";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,12 +18,12 @@ const router = createBrowserRouter(
       <Route path="demos" element={<DemosPage />} />
       <Route path="playground" element={<PlaygroundPage />} />
       <Route path="lab" element={<LabPage />} />
+      <Route path="tft" element={<TftCalculatorPage />} />
     </Route>
   )
 );
 
 function App() {
-  console.log("App");
   return <RouterProvider router={router} />;
 }
 
