@@ -41,13 +41,28 @@ function useTftProbability(
         perSlot: 0,
         atLeastOne: 0,
         afterNRefreshes: Array(10).fill(0),
+        expectedRefreshesTo2Star: null as number | null,
+        expectedRefreshesTo3Star: null as number | null,
       };
     const perSlot = odds * (remaining / totalRemaining);
     const atLeastOne = 1 - Math.pow(1 - perSlot, 5);
     const afterNRefreshes = Array.from({ length: 10 }, (_, n) =>
       1 - Math.pow(1 - atLeastOne, n + 1)
     );
-    return { perSlot, atLeastOne, afterNRefreshes };
+    const copiesPerRefresh = 5 * perSlot;
+    const to2Star = Math.max(0, 3 - owned);
+    const to3Star = Math.max(0, 9 - owned);
+    const expectedRefreshesTo2Star =
+      copiesPerRefresh > 0 ? to2Star / copiesPerRefresh : null;
+    const expectedRefreshesTo3Star =
+      copiesPerRefresh > 0 ? to3Star / copiesPerRefresh : null;
+    return {
+      perSlot,
+      atLeastOne,
+      afterNRefreshes,
+      expectedRefreshesTo2Star,
+      expectedRefreshesTo3Star,
+    };
   }, [level, cost, owned, sameCostTaken]);
 }
 
@@ -126,6 +141,33 @@ export function TftCalculatorPage() {
               单次刷新至少出现 1 个:{" "}
               <strong>{(result.atLeastOne * 100).toFixed(2)}%</strong>
             </p>
+            <h4 className="tft-result-subtitle">期望刷新次数（达到目标星数）</h4>
+            <div className="tft-expected-refreshes">
+              <p>
+                升至二星 (需 {Math.max(0, 3 - owned)} 个):{" "}
+                <strong>
+                  {result.expectedRefreshesTo2Star != null
+                    ? owned >= 3
+                      ? "已达成"
+                      : result.expectedRefreshesTo2Star < 0.1
+                        ? "<0.1"
+                        : `${result.expectedRefreshesTo2Star.toFixed(1)} 次`
+                    : "—"}
+                </strong>
+              </p>
+              <p>
+                升至三星 (需 {Math.max(0, 9 - owned)} 个):{" "}
+                <strong>
+                  {result.expectedRefreshesTo3Star != null
+                    ? owned >= 9
+                      ? "已达成"
+                      : result.expectedRefreshesTo3Star < 0.1
+                        ? "<0.1"
+                        : `${result.expectedRefreshesTo3Star.toFixed(1)} 次`
+                    : "—"}
+                </strong>
+              </p>
+            </div>
             <h4 className="tft-result-subtitle">刷新 1-10 次后至少出现 1 个</h4>
             <div className="tft-refresh-grid">
               {result.afterNRefreshes.map((prob, i) => (
