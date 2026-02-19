@@ -584,6 +584,14 @@ footer.animate-in {
   color: var(--color-text-muted);
 }
 
+.tft-expected-refreshes {
+  margin: 0.5rem 0;
+}
+
+.tft-expected-refreshes p {
+  margin: 0.5rem 0;
+}
+
 .tft-refresh-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
