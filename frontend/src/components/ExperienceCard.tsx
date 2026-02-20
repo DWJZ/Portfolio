@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import styles from "./ExperienceCard.module.css";
 
 interface ExperienceCardProps {
   title: string;
@@ -14,11 +15,11 @@ export function ExperienceCard({
   children,
 }: ExperienceCardProps) {
   return (
-    <article className="experience-card">
-      <h3 className="experience-title">{title}</h3>
-      <p className="experience-company">{company}</p>
-      {date ? <p className="experience-date">{date}</p> : null}
-      {children}
+    <article className={styles.card} data-observe="card">
+      <h3 className={styles.title}>{title}</h3>
+      <p className={styles.company}>{company}</p>
+      {date ? <p className={styles.date}>{date}</p> : null}
+      <div className={styles.body}>{children}</div>
     </article>
   );
 }

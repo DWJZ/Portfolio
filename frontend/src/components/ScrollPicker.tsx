@@ -1,4 +1,5 @@
 import { useRef, useEffect } from "react";
+import styles from "./ScrollPicker.module.css";
 
 interface ScrollPickerProps {
   value: number;
@@ -8,6 +9,8 @@ interface ScrollPickerProps {
   formatValue?: (v: number) => string;
 }
 
+const ITEM_HEIGHT = 44;
+
 export function ScrollPicker({
   value,
   onChange,
@@ -16,6 +19,9 @@ export function ScrollPicker({
   formatValue = (v) => String(v),
 }: ScrollPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const idx = options.indexOf(value);
+  const selectedIndex = idx >= 0 ? idx : 0;
 
   const changeByRef = useRef<(delta: number) => void>(() => {});
   changeByRef.current = (delta: number) => {
@@ -53,26 +59,43 @@ export function ScrollPicker({
   };
 
   return (
-    <div className="tft-field">
+    <div className={styles.field}>
       <label>{label}</label>
       <div
         ref={containerRef}
-        className="scroll-picker-inline"
+        className={styles.reel}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
       >
         <button
           type="button"
-          className="scroll-picker-inline-btn"
+          className={styles.btn}
           aria-label="Decrease"
           onClick={() => changeBy(1)}
         >
           −
         </button>
-        <span className="scroll-picker-inline-value">{formatValue(value)}</span>
+        <div className={styles.viewport}>
+          <div
+            className={styles.strip}
+            style={{
+              transform: `translateY(${-selectedIndex * ITEM_HEIGHT}px)`,
+            }}
+          >
+            {options.map((opt) => (
+              <div
+                key={opt}
+                className={styles.item}
+                style={{ height: ITEM_HEIGHT }}
+              >
+                {formatValue(opt)}
+              </div>
+            ))}
+          </div>
+        </div>
         <button
           type="button"
-          className="scroll-picker-inline-btn"
+          className={styles.btn}
           aria-label="Increase"
           onClick={() => changeBy(-1)}
         >
