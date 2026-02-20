@@ -37,7 +37,7 @@ export function ScrollPicker({
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (Math.abs(e.deltaY) > 10) {
-        changeByRef.current(e.deltaY > 0 ? 1 : -1);
+        changeByRef.current(e.deltaY > 0 ? -1 : 1);
       }
     };
     el.addEventListener("wheel", handleWheel, { passive: false });
@@ -53,7 +53,7 @@ export function ScrollPicker({
   const handleTouchMove = (e: React.TouchEvent) => {
     const dy = touchStartY.current - e.touches[0].clientY;
     if (Math.abs(dy) > 30) {
-      changeBy(dy > 0 ? 1 : -1);
+      changeBy(dy > 0 ? -1 : 1);
       touchStartY.current = e.touches[0].clientY;
     }
   };
