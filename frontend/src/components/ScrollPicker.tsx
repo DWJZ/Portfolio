@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import styles from "./ScrollPicker.module.css";
 
 interface ScrollPickerProps {
@@ -19,6 +19,9 @@ export function ScrollPicker({
   formatValue = (v) => String(v),
 }: ScrollPickerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
+  const touchStartRef = useRef<{ y: number; index: number } | null>(null);
 
   const idx = options.indexOf(value);
   const selectedIndex = idx >= 0 ? idx : 0;
@@ -31,6 +34,9 @@ export function ScrollPicker({
     onChange(options[newIdx]);
   };
 
+  const latestRef = useRef({ selectedIndex, options, onChange, dragOffset });
+  latestRef.current = { selectedIndex, options, onChange, dragOffset };
+
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -41,22 +47,52 @@ export function ScrollPicker({
       }
     };
     el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel);
+
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartRef.current = {
+        y: e.touches[0].clientY,
+        index: latestRef.current.selectedIndex,
+      };
+      setIsDragging(true);
+      setDragOffset(0);
+    };
+    const handleTouchMove = (e: TouchEvent) => {
+      const start = touchStartRef.current;
+      if (!start) return;
+      e.preventDefault();
+      const dy = e.touches[0].clientY - start.y;
+      setDragOffset(dy);
+    };
+    const handleTouchEnd = () => {
+      const start = touchStartRef.current;
+      if (!start) return;
+      const { options: opts } = latestRef.current;
+      const deltaItems = latestRef.current.dragOffset / ITEM_HEIGHT;
+      const newIndex = Math.max(
+        0,
+        Math.min(opts.length - 1, Math.round(start.index - deltaItems))
+      );
+      latestRef.current.onChange(opts[newIndex]);
+      touchStartRef.current = null;
+      setIsDragging(false);
+      setDragOffset(0);
+    };
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchcancel", handleTouchEnd);
+    };
   }, []);
 
   const changeBy = (delta: number) => changeByRef.current(delta);
-
-  const touchStartY = useRef<number>(0);
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const dy = touchStartY.current - e.touches[0].clientY;
-    if (Math.abs(dy) > 30) {
-      changeBy(dy > 0 ? -1 : 1);
-      touchStartY.current = e.touches[0].clientY;
-    }
-  };
 
   return (
     <div className={styles.field}>
@@ -64,8 +100,6 @@ export function ScrollPicker({
       <div
         ref={containerRef}
         className={styles.reel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
       >
         <button
           type="button"
@@ -79,7 +113,12 @@ export function ScrollPicker({
           <div
             className={styles.strip}
             style={{
-              transform: `translateY(${-selectedIndex * ITEM_HEIGHT}px)`,
+              transform: `translateY(${
+                isDragging && touchStartRef.current
+                  ? -touchStartRef.current.index * ITEM_HEIGHT + dragOffset
+                  : -selectedIndex * ITEM_HEIGHT
+              }px)`,
+              transition: isDragging ? "none" : undefined,
             }}
           >
             {options.map((opt) => (
