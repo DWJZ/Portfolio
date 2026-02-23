@@ -94,3 +94,27 @@
   color: var(--color-text);
   flex-shrink: 0;
 }
+
+/* Compact mode for mobile */
+.compact .reel {
+  min-height: 36px;
+}
+
+.compact .btn {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  font-size: 1.25rem;
+}
+
+.compact .viewport {
+  height: 32px;
+}
+
+.compact .field label {
+  font-size: 0.8rem;
+}
+
+.compact .item {
+  font-size: 0.95rem;
+}

@@ -46,14 +46,14 @@ export function NavBar() {
         <span className={styles.menuIcon} />
         <span className={styles.menuIcon} />
       </button>
-      {menuOpen && (
-        <div
-          className={styles.overlay}
-          onClick={() => setMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-      <div className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : ""}`}>
+      <div
+        className={`${styles.overlay} ${menuOpen ? styles.overlayVisible : styles.overlayHidden}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden={!menuOpen}
+      />
+      <div
+        className={`${styles.drawer} ${menuOpen ? styles.drawerOpen : styles.drawerClosed}`}
+      >
         <div className={styles.drawerHeader}>
           <span>菜单</span>
           <button
