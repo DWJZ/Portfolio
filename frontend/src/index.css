@@ -49,6 +49,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
+  overscroll-behavior-x: none;
+}
+
+#root {
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
@@ -59,6 +66,10 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  overscroll-behavior-x: none;
+  min-width: 0;
+  /* Prevent horizontal touch scroll on mobile */
+  touch-action: pan-y;
 }
 
 body::before {
@@ -85,6 +96,7 @@ body::before {
   padding: 1.5rem;
   position: relative;
   z-index: 1;
+  overflow-x: hidden;
 }
 
 header {
@@ -187,6 +199,8 @@ footer.animate-in {
   position: relative;
   z-index: 1;
   min-height: calc(100vh - 120px);
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 .site-footer {
@@ -227,5 +241,9 @@ footer.animate-in {
 
   header {
     padding: 2rem 0;
+  }
+
+  .page-header {
+    padding: 1.5rem 0 0.5rem;
   }
 }

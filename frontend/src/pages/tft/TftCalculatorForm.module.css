@@ -4,3 +4,10 @@
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
+
+@media (max-width: 480px) {
+  .form {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+}

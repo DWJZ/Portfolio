@@ -7,9 +7,12 @@ interface ScrollPickerProps {
   options: number[];
   label: string;
   formatValue?: (v: number) => string;
+  /** Compact mode for mobile - smaller touch targets */
+  compact?: boolean;
 }
 
 const ITEM_HEIGHT = 44;
+const ITEM_HEIGHT_COMPACT = 32;
 
 export function ScrollPicker({
   value,
@@ -17,7 +20,9 @@ export function ScrollPicker({
   options,
   label,
   formatValue = (v) => String(v),
+  compact = false,
 }: ScrollPickerProps) {
+  const itemHeight = compact ? ITEM_HEIGHT_COMPACT : ITEM_HEIGHT;
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
@@ -34,8 +39,20 @@ export function ScrollPicker({
     onChange(options[newIdx]);
   };
 
-  const latestRef = useRef({ selectedIndex, options, onChange, dragOffset });
-  latestRef.current = { selectedIndex, options, onChange, dragOffset };
+  const latestRef = useRef({
+    selectedIndex,
+    options,
+    onChange,
+    dragOffset,
+    itemHeight,
+  });
+  latestRef.current = {
+    selectedIndex,
+    options,
+    onChange,
+    dragOffset,
+    itemHeight,
+  };
 
   useEffect(() => {
     const el = containerRef.current;
@@ -67,7 +84,7 @@ export function ScrollPicker({
       const start = touchStartRef.current;
       if (!start) return;
       const { options: opts } = latestRef.current;
-      const deltaItems = latestRef.current.dragOffset / ITEM_HEIGHT;
+      const deltaItems = latestRef.current.dragOffset / latestRef.current.itemHeight;
       const newIndex = Math.max(
         0,
         Math.min(opts.length - 1, Math.round(start.index - deltaItems))
@@ -95,7 +112,7 @@ export function ScrollPicker({
   const changeBy = (delta: number) => changeByRef.current(delta);
 
   return (
-    <div className={styles.field}>
+    <div className={`${styles.field} ${compact ? styles.compact : ""}`}>
       <label>{label}</label>
       <div
         ref={containerRef}
@@ -115,8 +132,8 @@ export function ScrollPicker({
             style={{
               transform: `translateY(${
                 isDragging && touchStartRef.current
-                  ? -touchStartRef.current.index * ITEM_HEIGHT + dragOffset
-                  : -selectedIndex * ITEM_HEIGHT
+                  ? -touchStartRef.current.index * itemHeight + dragOffset
+                  : -selectedIndex * itemHeight
               }px)`,
               transition: isDragging ? "none" : undefined,
             }}
@@ -125,7 +142,7 @@ export function ScrollPicker({
               <div
                 key={opt}
                 className={styles.item}
-                style={{ height: ITEM_HEIGHT }}
+                style={{ height: itemHeight }}
               >
                 {formatValue(opt)}
               </div>
